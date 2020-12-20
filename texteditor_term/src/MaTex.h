@@ -14,12 +14,14 @@
 #include <string>
 #include <sstream>
 #include <iostream>
-
+#include "MaDocument.h"
 using namespace std;
 
 class MaTex {
 private:
 	bool close_app_flag = false;
+
+	MaDocument matex_document;
 
 public:
 	MaTex();
@@ -28,6 +30,7 @@ public:
 	vector<string> command_reader();
 	void command_router(vector<string> cmd);
 
+	//accessor and mutators
 	bool get_close_app_flag();
 	void set_close_app_flag(bool val);
 
