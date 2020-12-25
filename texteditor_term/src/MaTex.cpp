@@ -7,7 +7,6 @@
 
 #include "MaTex.h"
 
-
 //use enum to use commands in switch statement as case key. because it don't accept string as key.
 // In that way I tried to avoid using lots of if else statements.
 enum matex_code {
@@ -21,6 +20,7 @@ enum matex_code {
 	ma_prev,
 	ma_undo,
 	ma_exit,
+	ma_help,
 	ma_none
 };
 
@@ -34,6 +34,7 @@ matex_code hash_cmd (std::string const& command_text) {
     else if (command_text == "next") return ma_next;
     else if (command_text == "prev") return ma_prev;
     else if (command_text == "undo") return ma_undo;
+    else if (command_text == "help") return ma_help;
     else if (command_text == "exit") return ma_exit;
 
     else return ma_none;
@@ -75,27 +76,12 @@ void MaTex::command_router(vector<string> cmd){
 			//code
 			cout << "Open File" << endl;
 			if(cmd.size() > 1){
-				string filename;
-				filename = cmd[1];
-				cout << "Filename is " << filename << endl;
-
-				ifstream inFile;
-				inFile.open(filename);
-
-				if (!inFile) {
-				    cerr << "Unable to open file " << filename << endl;
-				      // call system to stop
-				}
-
-				string x;
-				while (inFile >> x) {
-				  cout << x << endl;
-				}
-
+				this->matex_document.Mac_Open(cmd[1]);
 			}
 			else{
-				cout << "open command need a filename" << endl;
+				cout << "open command need a filepath" << endl;
 			}
+
 			break;
 		case ma_save:
 			//code
@@ -120,14 +106,20 @@ void MaTex::command_router(vector<string> cmd){
 		case ma_next:
 			//code
 			cout << "Next Cmd" << endl;
+			this->matex_document.Mac_Next();
 			break;
 		case ma_prev:
 			//code
 			cout << "Prev Cmd" << endl;
+			this->matex_document.Mac_Prev();
 			break;
 		case ma_undo:
 			//code
 			cout << "Undo Cmd" << endl;
+			break;
+		case ma_help:
+			//code
+			cout << "Help Cmd" << endl;
 			break;
 		case ma_exit:
 			cout << "Exit" << endl;

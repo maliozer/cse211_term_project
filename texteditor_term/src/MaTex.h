@@ -26,7 +26,6 @@ private:
 public:
 	MaTex();
 	virtual ~MaTex();
-
 	vector<string> command_reader();
 	void command_router(vector<string> cmd);
 
