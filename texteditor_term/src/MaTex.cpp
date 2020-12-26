@@ -53,6 +53,8 @@ vector<string> MaTex::command_reader(){
 	string user_input;
 	vector<string> tokens;
 
+	cout << "open | save | insert | delete | move | replace | next | prev | undo | help | exit" << endl;
+
 	getline(cin,user_input);
 
 	istringstream iss(user_input);

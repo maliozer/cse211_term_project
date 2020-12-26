@@ -47,7 +47,6 @@ void MaDocument::Mac_Next(){
 		this->display_page(this->current_page + 1);
 		this->current_page += 1;
 	}
-
 }
 
 void MaDocument::Mac_Prev(){
@@ -59,7 +58,6 @@ void MaDocument::Mac_Prev(){
 		this->display_page(this->current_page - 1);
 		this->current_page -= 1;
 	}
-
 }
 
 
@@ -67,12 +65,14 @@ void MaDocument::addlineTail(string data){
 	MaLine* new_line = new MaLine();
 	new_line->line_data = data;
 	new_line->next = nullptr;
+	new_line->prev = nullptr;
 
 	if(this->head_doc == nullptr){
 		this->head_doc = new_line;
 		this->last_doc = new_line;
 	}
 	else{
+		new_line->prev = this->last_doc;
 		this->last_doc->next = new_line;
 		this->last_doc = new_line;
 	}
@@ -106,7 +106,7 @@ void MaDocument::display_page(int page_no){
 	cout << "\n\n --- Page "<< page_no <<" ---"<< endl;
 }
 
-
+//TEMPORARY METHOD WILL BE DELETED
 void MaDocument::printAll(){
 	MaLine* temp = this->head_doc;
 	int line_no=1;
