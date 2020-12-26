@@ -60,6 +60,39 @@ void MaDocument::Mac_Prev(){
 	}
 }
 
+void MaDocument::Mac_Insert(int n, string new_text){
+	MaLine* temp = this->head_doc;
+
+	MaLine* new_line = new MaLine();
+	new_line->line_data = new_text;
+	new_line->next = nullptr;
+
+	for (int i = 1; i <= n; ++i) {
+		if(i == n){
+			new_line->prev = temp->prev;
+			temp->prev->next = new_line;
+			new_line->next = temp;
+			temp->prev = new_line;
+		}
+
+		else if(i != n && (temp == nullptr || temp->next == nullptr)){
+			MaLine* blank_line = new MaLine();
+			blank_line->line_data = "__BLANK__";
+			blank_line->next = nullptr;
+			blank_line->prev = temp;
+			temp->next = blank_line;
+		}
+
+		temp = temp->next;
+
+
+	}
+
+	this->paginator();
+	this->display_page(this->current_page);
+
+}
+
 
 void MaDocument::addlineTail(string data){
 	MaLine* new_line = new MaLine();
@@ -79,6 +112,8 @@ void MaDocument::addlineTail(string data){
 }
 
 void MaDocument::paginator(){
+	this->page_heads.clear();
+
 	MaLine* temp = this->head_doc;
 	for (int i = 0; temp != nullptr; ++i) {
 		if(i % 10 == 0){

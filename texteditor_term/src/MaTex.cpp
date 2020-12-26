@@ -72,7 +72,6 @@ vector<string> MaTex::command_reader(){
 }
 
 void MaTex::command_router(vector<string> cmd){
-	bool exit_flag = false;
 	switch (hash_cmd(cmd[0])) {
 		case ma_open:
 			//code
@@ -91,7 +90,11 @@ void MaTex::command_router(vector<string> cmd){
 			break;
 		case ma_insert:
 			cout << "Insert Cmd" << endl;
-			//code
+			if(cmd.size() > 2){
+				int line_no = stoi(cmd[1]);
+				string line_text = cmd[2];
+				this->matex_document.Mac_Insert(line_no, line_text);
+			}
 			break;
 		case ma_delete:
 			cout << "Delete Cmd" << endl;

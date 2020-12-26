@@ -31,6 +31,8 @@ public:
 	void Mac_Open(string cmd);
 	void Mac_Next();
 	void Mac_Prev();
+	void Mac_Insert(int n, string new_text);
+
 	void addlineTail(string data);
 
 	void paginator();
