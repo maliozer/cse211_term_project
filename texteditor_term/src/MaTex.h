@@ -9,8 +9,6 @@
 #define MATEX_H_
 
 #include <vector>
-#include <fstream>
-
 #include <string>
 #include <sstream>
 #include <iostream>
@@ -27,7 +25,7 @@ public:
 	MaTex();
 	virtual ~MaTex();
 	vector<string> command_reader();
-	void command_router(vector<string> cmd);
+	void command_router(vector<string> cmd, bool undo_trigger = false);
 
 	//accessor and mutators
 	bool get_close_app_flag();

@@ -71,15 +71,18 @@ vector<string> MaTex::command_reader(){
 
 }
 
-void MaTex::command_router(vector<string> cmd){
+void MaTex::command_router(vector<string> cmd, bool undo_trigger){
 	switch (hash_cmd(cmd[0])) {
 		case ma_open:
 			//code
-			cout << "Open File" << endl;
 			if(cmd.size() > 1){
-				this->matex_document.Mac_Open(cmd[1]);
-				this->matex_document.paginator();
-				this->matex_document.display_page(this->matex_document.current_page);
+				bool success = 0;
+				success = this->matex_document.Mac_Open(cmd[1]);
+				if(success){
+					this->matex_document.paginator();
+					this->matex_document.display_page(this->matex_document.current_page);
+				}
+
 			}
 			else{
 				cout << "open command need a filepath" << endl;
@@ -88,10 +91,16 @@ void MaTex::command_router(vector<string> cmd){
 			break;
 		case ma_save:
 			//code
+			if(cmd.size() > 1){
+				this->matex_document.Mac_Save(cmd[1]);
+				cout << "Document saved as " << cmd[1] << ".txt" << endl;
+			}
+			else{
+				cout << "Provide a filename to save document!" << endl;
+			}
 			cout << "Save File" << endl;
 			break;
 		case ma_insert:
-			cout << "Insert Cmd" << endl;
 			if(cmd.size() > 2){
 				int line_no = stoi(cmd[1]);
 				string line_text = "";
@@ -99,7 +108,7 @@ void MaTex::command_router(vector<string> cmd){
 					line_text += cmd[i] + " ";
 				}
 
-				this->matex_document.Mac_Insert(line_no, line_text);
+				this->matex_document.Mac_Insert(line_no, line_text,undo_trigger);
 
 				this->matex_document.paginator();
 				this->matex_document.display_page(this->matex_document.current_page);
@@ -109,23 +118,22 @@ void MaTex::command_router(vector<string> cmd){
 			}
 			break;
 		case ma_delete:
-			cout << "Delete Cmd" << endl;
 			if(cmd.size() > 1){
 				int n = stoi(cmd[1]);
 				if (n < 0){n *= -1;} //get absolute value of n
-				this->matex_document.Mac_Delete(n);
-
+				this->matex_document.Mac_Delete(n, undo_trigger);
+				
 				this->matex_document.paginator();
 				this->matex_document.display_page(this->matex_document.current_page);
+				
 			}
 			//code
 			break;
 		case ma_move:
-			cout << "Move Cmd" << endl;
 			if(cmd.size() > 2){
 				int n = stoi(cmd[1]);
 				int m = stoi(cmd[2]);
-				this->matex_document.Mac_Move(n, m);
+				this->matex_document.Mac_Move(n, m, undo_trigger);
 
 				this->matex_document.paginator();
 				this->matex_document.display_page(this->matex_document.current_page);
@@ -133,8 +141,6 @@ void MaTex::command_router(vector<string> cmd){
 			else{
 				cout << "Give the line to from n to m!" << endl;
 			}
-
-
 			//code
 			break;
 		case ma_replace:
@@ -146,7 +152,7 @@ void MaTex::command_router(vector<string> cmd){
 					line_text += cmd[i] + " ";
 				}
 
-				this->matex_document.Mac_Replace(line_no, line_text);
+				this->matex_document.Mac_Replace(line_no, line_text,undo_trigger);
 
 				this->matex_document.paginator();
 				this->matex_document.display_page(this->matex_document.current_page);
@@ -156,22 +162,32 @@ void MaTex::command_router(vector<string> cmd){
 			}
 			break;
 		case ma_next:
-			//code
-			cout << "Next Cmd" << endl;
-			this->matex_document.Mac_Next();
+			this->matex_document.Mac_Next(undo_trigger);
 			break;
 		case ma_prev:
-			//code
-			cout << "Prev Cmd" << endl;
-			this->matex_document.Mac_Prev();
+			this->matex_document.Mac_Prev(undo_trigger);
 			break;
 		case ma_undo:
 			//code
-			cout << "Undo Cmd" << endl;
+			if(this->matex_document.doc_history.size() > 0){
+				vector<vector<string>> last_commands = this->matex_document.doc_history.top();
+				int cmd_size = last_commands.size();
+				for (int i = cmd_size-1; i >= 0; i--) {
+					this->command_router(last_commands[i], true);
+				}
+
+				this->matex_document.doc_history.pop();
+			}
+			else{
+				cout << "Nothing changes on document!" << endl;
+			}
 			break;
 		case ma_help:
 			//code
-			cout << this->matex_document.doc_size << endl;
+			if(this->matex_document.doc_history.size() > 0){
+				cout << this->matex_document.doc_history.size() << endl;
+			}
+
 			break;
 		case ma_exit:
 			cout << "Exit" << endl;
@@ -179,6 +195,7 @@ void MaTex::command_router(vector<string> cmd){
 			break;
 		default:
 			cout << "Command not found!" << endl;
+			cout << cmd[0] << endl;
 			break;
 	}//end of switch
 }

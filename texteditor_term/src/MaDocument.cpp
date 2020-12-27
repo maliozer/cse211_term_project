@@ -17,7 +17,7 @@ MaDocument::~MaDocument() {
 	// TODO Auto-generated destructor stub
 }
 
-void MaDocument::Mac_Open(string filepath){
+bool MaDocument::Mac_Open(string filepath){
 		cout << "Filename is " << filepath << endl;
 
 		ifstream inFile;
@@ -25,6 +25,7 @@ void MaDocument::Mac_Open(string filepath){
 
 		if (!inFile) {
 		    cerr << "Unable to open file " << filepath << endl;
+		    return 0;
 		}
 
 		string x;
@@ -32,29 +33,64 @@ void MaDocument::Mac_Open(string filepath){
 			this->addlineTail(x);
 		}
 
+		return 1;
+
 }
 
-void MaDocument::Mac_Next(){
+void MaDocument::Mac_Save(string filename){
+	MaLine* temp = this->head_doc;
+
+	ofstream MaDocumentObject;
+	MaDocumentObject.open (filename + ".txt");
+	while(temp != nullptr){
+		if(temp->next != nullptr){
+			MaDocumentObject << temp->line_data << endl;
+		}
+		else{
+			MaDocumentObject << temp->line_data;
+		}
+
+		temp = temp->next;
+	}
+
+	MaDocumentObject.close();
+}
+
+void MaDocument::Mac_Next(bool from_undo){
 	if(this->page_heads.size() < current_page + 1){
 		this->display_page(this->current_page);
 		cout << "This is the last page!" << endl;
 	}
 	else{
+		if(!from_undo){
+			vector<string> command;
+			command.push_back("prev");
+			this->hist.push_back(command);
+			this->doc_history.push(this->hist);
+			this->hist.clear();
+		}
 		this->display_page(this->current_page + 1);
 	}
 }
 
-void MaDocument::Mac_Prev(){
+void MaDocument::Mac_Prev(bool from_undo){
 	if(current_page - 1 == 0){
 		this->display_page(this->current_page);
 		cout << "This is the first page!" << endl;
 	}
 	else{
+		if(!from_undo){
+			vector<string> command;
+			command.push_back("next");
+			this->hist.push_back(command);
+			this->doc_history.push(this->hist);
+			this->hist.clear();
+		}
 		this->display_page(this->current_page - 1);
 	}
 }
 
-void MaDocument::Mac_Insert(int n, string new_text){
+void MaDocument::Mac_Insert(int n, string new_text, bool from_undo){
 	int distance = n - this->doc_size;
 
 	if(distance <= 0){
@@ -75,11 +111,22 @@ void MaDocument::Mac_Insert(int n, string new_text){
 				new_line->next = temp;
 				temp->prev = new_line;
 
+				
+
 				this->doc_size++;
 				break;
 			}
 
 			temp = temp->next;
+		}
+
+		if(!from_undo){
+			vector<string> command;
+			command.push_back("delete");
+			command.push_back(to_string(n));
+			this->hist.push_back(command);
+			this->doc_history.push(this->hist);
+			this->hist.clear();
 		}
 	}
 
@@ -92,13 +139,24 @@ void MaDocument::Mac_Insert(int n, string new_text){
 				this->addlineTail("__BLANK__");
 			}
 			distance--;
+
+			if(!from_undo){
+				vector<string> command;
+				command.push_back("delete");
+				command.push_back(to_string(this->doc_size));
+				this->hist.push_back(command);
+			}
 			// send message to undo -> delete(this->doc_size (ıncı satırı sil))
 		}
+			if(!from_undo){
+				this->doc_history.push(this->hist);
+				this->hist.clear();
+			}
 	}
 
 }
 
-void MaDocument::Mac_Delete(int n){
+void MaDocument::Mac_Delete(int n,bool from_undo){
 	int distance = this->doc_size - n;
 	if(distance < 0){
 		cout << "The line does not exist!" << endl;
@@ -110,6 +168,16 @@ void MaDocument::Mac_Delete(int n){
 
 		MaLine* temp = this->head_doc;
 		this->head_doc = this->head_doc->next;
+		if(!from_undo){
+			vector<string> command;
+			command.push_back("insert");
+			command.push_back(to_string(n));
+			command.push_back(temp->line_data);
+			this->hist.push_back(command);
+			this->doc_history.push(this->hist);
+			this->hist.clear();
+		}
+
 		free(temp);
 
 		this->doc_size--;
@@ -117,6 +185,15 @@ void MaDocument::Mac_Delete(int n){
 	}
 	else if(distance == 0){
 		MaLine* temp = this->last_doc;
+		if(!from_undo){
+			vector<string> command;
+			command.push_back("insert");
+			command.push_back(to_string(n));
+			command.push_back(temp->line_data);
+			this->hist.push_back(command);
+			this->doc_history.push(this->hist);
+			this->hist.clear();
+		}
 		last_doc = last_doc->prev;
 		last_doc->next = nullptr;
 		this->doc_size--;
@@ -129,15 +206,25 @@ void MaDocument::Mac_Delete(int n){
 				searcher_ptr->prev->next = searcher_ptr->next;
 				searcher_ptr->next->prev = searcher_ptr->prev;
 				this->doc_size--;
-				free(searcher_ptr);
 				break;
 			}
 			searcher_ptr = searcher_ptr->next;
 		}
+
+		if(!from_undo){
+			vector<string> command;
+			command.push_back("insert");
+			command.push_back(to_string(n));
+			command.push_back(searcher_ptr->line_data);
+			this->hist.push_back(command);
+			this->doc_history.push(this->hist);
+			this->hist.clear();
+		}
+		free(searcher_ptr);
 	}
 }
 
-void MaDocument::Mac_Move(int n, int m){
+void MaDocument::Mac_Move(int n, int m, bool from_undo){
 	if(this->doc_size < n){
 		cout << "Line " << n << " does not exist!" << endl;
 	}
@@ -152,25 +239,52 @@ void MaDocument::Mac_Move(int n, int m){
 			n_ptr = n_ptr->next;
 		}
 		string moved_data =  n_ptr->line_data;
-		this->Mac_Delete(n);
-		this->Mac_Insert(m,moved_data);
+		this->Mac_Delete(n, true);
+		this->Mac_Insert(m,moved_data, true);
+		
+
+		if(!from_undo){
+			vector<string> command;
+			command.push_back("move");
+			command.push_back(to_string(m));
+			command.push_back(to_string(n));
+			this->hist.push_back(command);
+			this->doc_history.push(this->hist);
+			this->hist.clear();
+		}
 
 	}
 
 }
 
-void MaDocument::Mac_Replace(int n, string new_text){
+void MaDocument::Mac_Replace(int n, string new_text, bool from_undo){
 	if(n <= this->doc_size){
 		MaLine* searcher_ptr = this->head_doc;
 		for (int i = 1; i < n; ++i) {
 			searcher_ptr = searcher_ptr->next;
 		}
 
+		string old_data = searcher_ptr->line_data;
+
 		searcher_ptr->line_data = new_text;
+
+		if(!from_undo){
+			vector<string> command;
+			command.push_back("replace");
+			command.push_back(to_string(n));
+			command.push_back(old_data);
+			this->hist.push_back(command);
+			this->doc_history.push(this->hist);
+			this->hist.clear();
+		}
 	}
 	else{
 		cout << "Line does not exist!" << endl;
 	}
+
+}
+
+void MaDocument::Mac_Undo(){
 
 }
 
