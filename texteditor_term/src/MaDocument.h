@@ -25,6 +25,7 @@ public:
 	MaLine* last_doc;
 
 	int current_page = 1;
+	int doc_size = 0;
 	vector<MaLine*> page_heads;
 	MaDocument();
 	virtual ~MaDocument();
@@ -32,9 +33,11 @@ public:
 	void Mac_Next();
 	void Mac_Prev();
 	void Mac_Insert(int n, string new_text);
+	void Mac_Delete(int n);
+	void Mac_Move(int n, int m);
+	void Mac_Replace(int n, string new_text);
 
 	void addlineTail(string data);
-
 	void paginator();
 	void display_page(int page_no);
 

@@ -25,7 +25,6 @@ void MaDocument::Mac_Open(string filepath){
 
 		if (!inFile) {
 		    cerr << "Unable to open file " << filepath << endl;
-		      // call system to stop
 		}
 
 		string x;
@@ -33,9 +32,6 @@ void MaDocument::Mac_Open(string filepath){
 			this->addlineTail(x);
 		}
 
-		//this->printAll();
-		paginator();
-		this->display_page(this->current_page);
 }
 
 void MaDocument::Mac_Next(){
@@ -45,7 +41,6 @@ void MaDocument::Mac_Next(){
 	}
 	else{
 		this->display_page(this->current_page + 1);
-		this->current_page += 1;
 	}
 }
 
@@ -56,40 +51,126 @@ void MaDocument::Mac_Prev(){
 	}
 	else{
 		this->display_page(this->current_page - 1);
-		this->current_page -= 1;
 	}
 }
 
 void MaDocument::Mac_Insert(int n, string new_text){
-	MaLine* temp = this->head_doc;
+	int distance = n - this->doc_size;
 
-	MaLine* new_line = new MaLine();
-	new_line->line_data = new_text;
-	new_line->next = nullptr;
+	if(distance <= 0){
+		MaLine* temp = this->head_doc;
+		for (int i = 1; i <= n; ++i) {
+			if(i == n){
+				MaLine* new_line = new MaLine();
+				new_line->line_data = new_text;
 
-	for (int i = 1; i <= n; ++i) {
-		if(i == n){
-			new_line->prev = temp->prev;
-			temp->prev->next = new_line;
-			new_line->next = temp;
-			temp->prev = new_line;
+				new_line->prev = temp->prev;
+				if(n != 1){
+					temp->prev->next = new_line;
+				}
+				else{
+					this->head_doc = new_line;
+				}
+
+				new_line->next = temp;
+				temp->prev = new_line;
+
+				this->doc_size++;
+				break;
+			}
+
+			temp = temp->next;
+		}
+	}
+
+	else{
+		while(distance >= 1){
+			if(distance == 1){
+				this->addlineTail(new_text);
+			}
+			else if(distance > 1){
+				this->addlineTail("__BLANK__");
+			}
+			distance--;
+			// send message to undo -> delete(this->doc_size (ıncı satırı sil))
+		}
+	}
+
+}
+
+void MaDocument::Mac_Delete(int n){
+	int distance = this->doc_size - n;
+	if(distance < 0){
+		cout << "The line does not exist!" << endl;
+	}
+	else if(n == 1){
+		if(this->head_doc->next == nullptr){
+			this->addlineTail("__BLANK_DEL__");
 		}
 
-		else if(i != n && (temp == nullptr || temp->next == nullptr)){
-			MaLine* blank_line = new MaLine();
-			blank_line->line_data = "__BLANK__";
-			blank_line->next = nullptr;
-			blank_line->prev = temp;
-			temp->next = blank_line;
+		MaLine* temp = this->head_doc;
+		this->head_doc = this->head_doc->next;
+		free(temp);
+
+		this->doc_size--;
+
+	}
+	else if(distance == 0){
+		MaLine* temp = this->last_doc;
+		last_doc = last_doc->prev;
+		last_doc->next = nullptr;
+		this->doc_size--;
+		free(temp);
+	}
+	else{
+		MaLine* searcher_ptr = this->head_doc;
+		for (int i = 1; i <= this->doc_size; ++i) {
+			if(i == n){
+				searcher_ptr->prev->next = searcher_ptr->next;
+				searcher_ptr->next->prev = searcher_ptr->prev;
+				this->doc_size--;
+				free(searcher_ptr);
+				break;
+			}
+			searcher_ptr = searcher_ptr->next;
 		}
+	}
+}
 
-		temp = temp->next;
+void MaDocument::Mac_Move(int n, int m){
+	if(this->doc_size < n){
+		cout << "Line " << n << " does not exist!" << endl;
+	}
+	else{
+		MaLine* n_ptr = this->head_doc;
+		MaLine* m_ptr = this->head_doc;
+		for (int i = 1; i <= n; ++i) {
+			if(i == n){
+				break;
+			}
 
+			n_ptr = n_ptr->next;
+		}
+		string moved_data =  n_ptr->line_data;
+		this->Mac_Delete(n);
+		this->Mac_Insert(m,moved_data);
 
 	}
 
-	this->paginator();
-	this->display_page(this->current_page);
+}
+
+void MaDocument::Mac_Replace(int n, string new_text){
+	if(n <= this->doc_size){
+		MaLine* searcher_ptr = this->head_doc;
+		for (int i = 1; i < n; ++i) {
+			searcher_ptr = searcher_ptr->next;
+		}
+
+		searcher_ptr->line_data = new_text;
+	}
+	else{
+		cout << "Line does not exist!" << endl;
+	}
 
 }
 
@@ -109,7 +190,11 @@ void MaDocument::addlineTail(string data){
 		this->last_doc->next = new_line;
 		this->last_doc = new_line;
 	}
+
+	this->doc_size++;
 }
+
+
 
 void MaDocument::paginator(){
 	this->page_heads.clear();
@@ -125,6 +210,12 @@ void MaDocument::paginator(){
 }
 
 void MaDocument::display_page(int page_no){
+	int max_page = this->page_heads.size();
+	if(page_no > max_page){
+		page_no = max_page;
+	}
+	this->current_page = page_no;
+
 	MaLine* temp = this->page_heads[page_no - 1];
 	int page_no_limit = page_no * 10;
 

@@ -78,6 +78,8 @@ void MaTex::command_router(vector<string> cmd){
 			cout << "Open File" << endl;
 			if(cmd.size() > 1){
 				this->matex_document.Mac_Open(cmd[1]);
+				this->matex_document.paginator();
+				this->matex_document.display_page(this->matex_document.current_page);
 			}
 			else{
 				cout << "open command need a filepath" << endl;
@@ -92,21 +94,66 @@ void MaTex::command_router(vector<string> cmd){
 			cout << "Insert Cmd" << endl;
 			if(cmd.size() > 2){
 				int line_no = stoi(cmd[1]);
-				string line_text = cmd[2];
+				string line_text = "";
+				for (int i = 2; i < cmd.size(); ++i) {
+					line_text += cmd[i] + " ";
+				}
+
 				this->matex_document.Mac_Insert(line_no, line_text);
+
+				this->matex_document.paginator();
+				this->matex_document.display_page(this->matex_document.current_page);
+			}
+			else{
+				cout << "Please enter the line content!" << endl;
 			}
 			break;
 		case ma_delete:
 			cout << "Delete Cmd" << endl;
+			if(cmd.size() > 1){
+				int n = stoi(cmd[1]);
+				if (n < 0){n *= -1;} //get absolute value of n
+				this->matex_document.Mac_Delete(n);
+
+				this->matex_document.paginator();
+				this->matex_document.display_page(this->matex_document.current_page);
+			}
 			//code
 			break;
 		case ma_move:
 			cout << "Move Cmd" << endl;
+			if(cmd.size() > 2){
+				int n = stoi(cmd[1]);
+				int m = stoi(cmd[2]);
+				this->matex_document.Mac_Move(n, m);
+
+				this->matex_document.paginator();
+				this->matex_document.display_page(this->matex_document.current_page);
+			}
+			else{
+				cout << "Give the line to from n to m!" << endl;
+			}
+
+
 			//code
 			break;
 		case ma_replace:
 			//code
-			cout << "Replace Cmd" << endl;
+			if(cmd.size() > 2){
+				int line_no = stoi(cmd[1]);
+				string line_text = "";
+				for (int i = 2; i < cmd.size(); ++i) {
+					line_text += cmd[i] + " ";
+				}
+
+				this->matex_document.Mac_Replace(line_no, line_text);
+
+				this->matex_document.paginator();
+				this->matex_document.display_page(this->matex_document.current_page);
+			}
+			else{
+				cout << "Please enter the line content!" << endl;
+			}
 			break;
 		case ma_next:
 			//code
@@ -124,7 +171,7 @@ void MaTex::command_router(vector<string> cmd){
 			break;
 		case ma_help:
 			//code
-			cout << "Help Cmd" << endl;
+			cout << this->matex_document.doc_size << endl;
 			break;
 		case ma_exit:
 			cout << "Exit" << endl;
