@@ -2,13 +2,11 @@
  * MaTex.cpp
  *
  *  Created on: Dec 19, 2020
- *      Author: blanc
+ *      Author: maliozer
  */
 
 #include "MaTex.h"
 
-//use enum to use commands in switch statement as case key. because it don't accept string as key.
-// In that way I tried to avoid using lots of if else statements.
 enum matex_code {
     ma_open,
     ma_save,
@@ -104,7 +102,7 @@ void MaTex::command_router(vector<string> cmd, bool undo_trigger){
 			if(cmd.size() > 2){
 				int line_no = stoi(cmd[1]);
 				string line_text = "";
-				for (int i = 2; i < cmd.size(); ++i) {
+				for (unsigned int i = 2; i < cmd.size(); ++i) {
 					line_text += cmd[i] + " ";
 				}
 
@@ -148,7 +146,7 @@ void MaTex::command_router(vector<string> cmd, bool undo_trigger){
 			if(cmd.size() > 2){
 				int line_no = stoi(cmd[1]);
 				string line_text = "";
-				for (int i = 2; i < cmd.size(); ++i) {
+				for (unsigned int i = 2; i < cmd.size(); ++i) {
 					line_text += cmd[i] + " ";
 				}
 

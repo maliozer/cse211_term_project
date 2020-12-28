@@ -3,7 +3,7 @@
 // Author      : maliozer
 // Version     :
 // Copyright   : Copyright Mehmet Ali Özer
-// Description : term project
+// Description : yeditepe term project
 //============================================================================
 
 #include "MaTex.h"
@@ -17,6 +17,6 @@ int main() {
 		app.command_router(app.command_reader());
 	}
 
-	cout << "END OF PROGRAM" << endl; // prints END OF PROGRAM
+	cout << "END OF PROGRAM" << endl;
 	return 0;
 }
