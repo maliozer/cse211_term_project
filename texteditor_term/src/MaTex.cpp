@@ -18,7 +18,7 @@ enum matex_code {
 	ma_prev,
 	ma_undo,
 	ma_exit,
-	ma_help,
+	ma_hist,
 	ma_none
 };
 
@@ -32,7 +32,7 @@ matex_code hash_cmd (std::string const& command_text) {
     else if (command_text == "next") return ma_next;
     else if (command_text == "prev") return ma_prev;
     else if (command_text == "undo") return ma_undo;
-    else if (command_text == "help") return ma_help;
+    else if (command_text == "history") return ma_hist;
     else if (command_text == "exit") return ma_exit;
 
     else return ma_none;
@@ -51,7 +51,7 @@ vector<string> MaTex::command_reader(){
 	string user_input;
 	vector<string> tokens;
 
-	cout << "open | save | insert | delete | move | replace | next | prev | undo | help | exit" << endl;
+	cout << "open | save | insert | delete | move | replace | next | prev | undo | history | exit" << endl;
 
 	getline(cin,user_input);
 
@@ -177,13 +177,16 @@ void MaTex::command_router(vector<string> cmd, bool undo_trigger){
 				this->matex_document.doc_history.pop();
 			}
 			else{
-				cout << "Nothing changes on document!" << endl;
+				cout << "Nothing changed on document!" << endl;
 			}
 			break;
-		case ma_help:
+		case ma_hist:
 			//code
 			if(this->matex_document.doc_history.size() > 0){
-				cout << this->matex_document.doc_history.size() << endl;
+				cout << "Number of Completed Actions: " << this->matex_document.doc_history.size() << endl;
+			}
+			else{
+				cout << "Number of Completed Actions: " << 0 << endl;
 			}
 
 			break;
