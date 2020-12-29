@@ -182,6 +182,9 @@ void MaTex::command_router(vector<string> cmd, bool undo_trigger){
 			break;
 		case ma_hist:
 			//code
+			if(this->matex_document.head_doc != nullptr){
+				this->matex_document.display_page(this->matex_document.current_page);
+			}
 			if(this->matex_document.doc_history.size() > 0){
 				cout << "Number of Completed Actions: " << this->matex_document.doc_history.size() << endl;
 			}
@@ -208,4 +211,3 @@ bool MaTex::get_close_app_flag(){
 void MaTex::set_close_app_flag(bool val){
 	this->close_app_flag = val;
 };
-

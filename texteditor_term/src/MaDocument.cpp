@@ -22,21 +22,26 @@ bool MaDocument::Mac_Open(string filepath){
 
 		ifstream inFile(filepath);
 
-		if (!inFile) {
-		    cerr << "Unable to open file " << filepath << endl;
-		    return 0;
+		if(inFile.peek() == EOF){
+			this->deleteAll();
+			this->addlineTail(" ");
 		}
+		else{
+			if (!inFile) {
+				cerr << "Unable to open file " << filepath << endl;
+				return 0;
+			}
 
-		this->deleteAll();
+			this->deleteAll();
 
-		string x;
-
-		while (getline(inFile, x)) {
-			this->addlineTail(x);
+			string x;
+			while (getline(inFile, x)) {
+				this->addlineTail(x);
+			}
+			
 		}
 
 		return 1;
-
 }
 
 void MaDocument::Mac_Save(string filename){
@@ -147,7 +152,7 @@ void MaDocument::Mac_Insert(int n, string new_text, bool from_undo){
 				this->addlineTail(new_text);
 			}
 			else if(distance > 1){
-				this->addlineTail("");
+				this->addlineTail(" ");
 				/* change with uncommented line to see effect */
 				// this->addlineTail("__BLANK__");
 			}
@@ -176,7 +181,7 @@ void MaDocument::Mac_Delete(int n,bool from_undo){
 	}
 	else if(n == 1){
 		if(this->head_doc->next == nullptr){
-			this->addlineTail("");
+			this->addlineTail(" ");
 			/* change with uncommented line to see effect */
 			// this->addlineTail("__BLANK_DEL__");
 		}
@@ -300,6 +305,9 @@ void MaDocument::Mac_Replace(int n, string new_text, bool from_undo){
 
 void MaDocument::addlineTail(string data){
 	MaLine* new_line = new MaLine();
+	if(data == ""){
+		data = " ";
+	}
 	new_line->line_data = data;
 	new_line->next = nullptr;
 	new_line->prev = nullptr;
@@ -316,8 +324,6 @@ void MaDocument::addlineTail(string data){
 
 	this->doc_size++;
 }
-
-
 
 void MaDocument::paginator(){
 	this->page_heads.clear();
@@ -342,7 +348,7 @@ void MaDocument::display_page(int page_no){
 	MaLine* temp = this->page_heads[page_no - 1];
 	int page_no_limit = page_no * 10;
 	this->clear_screen();
-	cout << "---------- BEGIN DOCUMENT ------------" << endl;
+	cout << "---------- BEGIN PAGE ------------" << endl;
 	for (int line_no=(-10 + (page_no * 10) + 1); line_no <= page_no_limit; ++line_no) {
 		if(temp == nullptr){
 			break;
@@ -350,7 +356,7 @@ void MaDocument::display_page(int page_no){
 		cout << line_no <<") " << temp->line_data << endl;
 		temp = temp->next;
 	}
-	cout << "---------- END DOCUMENT ------------" << endl;
+	cout << "---------- END PAGE ------------" << endl;
 
 	cout << "\n\n --- Page "<< page_no <<" ---"<< endl;
 }
@@ -376,4 +382,11 @@ void MaDocument::deleteAll(){
 			break;
 		}
 	}
+
+	this->current_page = 1;
+
+	while(this->doc_history.size()>0){
+		this->doc_history.pop();
+	}
+	
 }

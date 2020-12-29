@@ -2,6 +2,8 @@
     "files.associations": {
         "*.conf": "xml",
         "ostream": "cpp",
-        "iostream": "cpp"
+        "iostream": "cpp",
+        "memory": "cpp",
+        "istream": "cpp"
     }
 }
