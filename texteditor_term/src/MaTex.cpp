@@ -72,7 +72,6 @@ vector<string> MaTex::command_reader(){
 void MaTex::command_router(vector<string> cmd, bool undo_trigger){
 	switch (hash_cmd(cmd[0])) {
 		case ma_open:
-			//code
 			if(cmd.size() > 1){
 				bool success = 0;
 				success = this->matex_document.Mac_Open(cmd[1]);
@@ -80,7 +79,6 @@ void MaTex::command_router(vector<string> cmd, bool undo_trigger){
 					this->matex_document.paginator();
 					this->matex_document.display_page(this->matex_document.current_page);
 				}
-
 			}
 			else{
 				cout << "open command need a filepath" << endl;
@@ -88,110 +86,151 @@ void MaTex::command_router(vector<string> cmd, bool undo_trigger){
 
 			break;
 		case ma_save:
-			//code
-			if(cmd.size() > 1){
-				this->matex_document.Mac_Save(cmd[1]);
-				cout << "Document saved as " << cmd[1] << ".txt" << endl;
-			}
-			else{
-				cout << "Provide a filename to save document!" << endl;
-			}
-			cout << "Save File" << endl;
-			break;
-		case ma_insert:
-			if(cmd.size() > 2){
-				int line_no = stoi(cmd[1]);
-				string line_text = "";
-				for (unsigned int i = 2; i < cmd.size(); ++i) {
-					line_text += cmd[i] + " ";
+			if(this->matex_document.head_doc != nullptr){
+				if(cmd.size() > 1){
+					this->matex_document.Mac_Save(cmd[1]);
+					cout << "Document saved as " << cmd[1] << ".txt" << endl;
 				}
+				else{
+					cout << "Provide a filename to save document!" << endl;
+				}
+				cout << "Save File" << endl;
 
-				this->matex_document.Mac_Insert(line_no, line_text,undo_trigger);
-
-				this->matex_document.paginator();
-				this->matex_document.display_page(this->matex_document.current_page);
 			}
 			else{
-				cout << "Please enter the line content!" << endl;
+				cout << "Please open a document!" << endl;
+			}
+
+			break;
+
+		case ma_insert:
+			if(this->matex_document.head_doc != nullptr){
+				if(cmd.size() > 2){
+					int line_no = stoi(cmd[1]);
+					string line_text = "";
+					for (unsigned int i = 2; i < cmd.size(); ++i) {
+						line_text += cmd[i] + " ";
+					}
+
+					this->matex_document.Mac_Insert(line_no, line_text,undo_trigger);
+
+					this->matex_document.paginator();
+					this->matex_document.display_page(this->matex_document.current_page);
+				}
+				else{
+					cout << "Please enter the line content!" << endl;
+				}
+			}
+			else{
+				cout << "Please open a document!" << endl;
 			}
 			break;
 		case ma_delete:
-			if(cmd.size() > 1){
-				int n = stoi(cmd[1]);
-				if (n < 0){n *= -1;} //get absolute value of n
-				this->matex_document.Mac_Delete(n, undo_trigger);
-				
-				this->matex_document.paginator();
-				this->matex_document.display_page(this->matex_document.current_page);
-				
+			if(this->matex_document.head_doc != nullptr){
+				if(cmd.size() > 1){
+					int n = stoi(cmd[1]);
+					if (n < 0){n *= -1;} //get absolute value of n
+					this->matex_document.Mac_Delete(n, undo_trigger);
+
+					this->matex_document.paginator();
+					this->matex_document.display_page(this->matex_document.current_page);
+
+				}
 			}
-			//code
+			else{
+				cout << "Please open a document!" << endl;
+			}
 			break;
 		case ma_move:
-			if(cmd.size() > 2){
-				int n = stoi(cmd[1]);
-				int m = stoi(cmd[2]);
-				this->matex_document.Mac_Move(n, m, undo_trigger);
+			if(this->matex_document.head_doc != nullptr){
+				if(cmd.size() > 2){
+					int n = stoi(cmd[1]);
+					int m = stoi(cmd[2]);
+					this->matex_document.Mac_Move(n, m, undo_trigger);
 
-				this->matex_document.paginator();
-				this->matex_document.display_page(this->matex_document.current_page);
+					this->matex_document.paginator();
+					this->matex_document.display_page(this->matex_document.current_page);
+				}
+				else{
+					cout << "Give the line to from n to m!" << endl;
+				}
 			}
 			else{
-				cout << "Give the line to from n to m!" << endl;
+				cout << "Please open a document!" << endl;
 			}
-			//code
 			break;
 		case ma_replace:
-			//code
-			if(cmd.size() > 2){
-				int line_no = stoi(cmd[1]);
-				string line_text = "";
-				for (unsigned int i = 2; i < cmd.size(); ++i) {
-					line_text += cmd[i] + " ";
+			if(this->matex_document.head_doc != nullptr){
+				if(cmd.size() > 2){
+					int line_no = stoi(cmd[1]);
+					string line_text = "";
+					for (unsigned int i = 2; i < cmd.size(); ++i) {
+						line_text += cmd[i] + " ";
+					}
+
+					this->matex_document.Mac_Replace(line_no, line_text,undo_trigger);
+
+					this->matex_document.paginator();
+					this->matex_document.display_page(this->matex_document.current_page);
 				}
-
-				this->matex_document.Mac_Replace(line_no, line_text,undo_trigger);
-
-				this->matex_document.paginator();
-				this->matex_document.display_page(this->matex_document.current_page);
+				else{
+					cout << "Please enter the line content!" << endl;
+				}
 			}
 			else{
-				cout << "Please enter the line content!" << endl;
+				cout << "Please open a document!" << endl;
 			}
 			break;
 		case ma_next:
-			this->matex_document.Mac_Next(undo_trigger);
-			break;
-		case ma_prev:
-			this->matex_document.Mac_Prev(undo_trigger);
-			break;
-		case ma_undo:
-			//code
-			if(this->matex_document.doc_history.size() > 0){
-				vector<vector<string>> last_commands = this->matex_document.doc_history.top();
-				int cmd_size = last_commands.size();
-				for (int i = cmd_size-1; i >= 0; i--) {
-					this->command_router(last_commands[i], true);
+			if(this->matex_document.head_doc != nullptr){
+				this->matex_document.Mac_Next(undo_trigger);
 				}
+				else{
+					cout << "Please open a document!" << endl;
+				}
+				break;
+			case ma_prev:
+				if(this->matex_document.head_doc != nullptr){
+				this->matex_document.Mac_Prev(undo_trigger);
+				}
+				else{
+					cout << "Please open a document!" << endl;
+				}
+				break;
+			case ma_undo:
+			if(this->matex_document.head_doc != nullptr){
+				if(this->matex_document.doc_history.size() > 0){
+					vector<vector<string>> last_commands = this->matex_document.doc_history.top();
+					int cmd_size = last_commands.size();
+					for (int i = cmd_size-1; i >= 0; i--) {
+						this->command_router(last_commands[i], true);
+					}
 
-				this->matex_document.doc_history.pop();
+					this->matex_document.doc_history.pop();
+				}
+				else{
+					cout << "Nothing changed on document!" << endl;
+				}
 			}
 			else{
-				cout << "Nothing changed on document!" << endl;
+				cout << "Please open a document!" << endl;
 			}
 			break;
 		case ma_hist:
-			//code
 			if(this->matex_document.head_doc != nullptr){
-				this->matex_document.display_page(this->matex_document.current_page);
-			}
-			if(this->matex_document.doc_history.size() > 0){
-				cout << "Number of Completed Actions: " << this->matex_document.doc_history.size() << endl;
+				if(this->matex_document.head_doc != nullptr){
+					this->matex_document.display_page(this->matex_document.current_page);
+				}
+				if(this->matex_document.doc_history.size() > 0){
+					cout << "Number of Completed Actions: " << this->matex_document.doc_history.size() << endl;
+				}
+				else{
+					cout << "Number of Completed Actions: " << 0 << endl;
+				}
 			}
 			else{
-				cout << "Number of Completed Actions: " << 0 << endl;
+				cout << "Please open a document!" << endl;
 			}
-
 			break;
 		case ma_exit:
 			cout << "Exit" << endl;

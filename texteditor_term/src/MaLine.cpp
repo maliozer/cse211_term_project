@@ -9,6 +9,8 @@
 
 MaLine::MaLine() {
 	// TODO Auto-generated constructor stub
+	this->prev = nullptr;
+	this->next = nullptr;
 
 }
 

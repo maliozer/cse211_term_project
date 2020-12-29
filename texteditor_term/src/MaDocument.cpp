@@ -245,6 +245,7 @@ void MaDocument::Mac_Delete(int n,bool from_undo){
 }
 
 void MaDocument::Mac_Move(int n, int m, bool from_undo){
+	cout << this->doc_size << endl;
 	if(this->doc_size < n){
 		cout << "Line " << n << " does not exist!" << endl;
 	}
@@ -373,12 +374,13 @@ void MaDocument::deleteAll(){
 			temp->prev = nullptr;
 			free(this->head_doc);
 
-			this->doc_size--;
 			this->head_doc = temp;
 		}
 		else{
 			free(temp);
 			this->head_doc = nullptr;
+			this->last_doc = nullptr;
+			this->doc_size = 0;
 			break;
 		}
 	}
